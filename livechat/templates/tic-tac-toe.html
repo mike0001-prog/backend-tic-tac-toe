@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TIC-TAC-TOE</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      td {
+        width: 100px;
+        height: 100px;
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bolder;
+        font-family: "Courier New", Courier, monospace;
+        font-size: xx-large;
+      }
+      table {
+        height: 50vh;
+      }
+      .wrapper {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .player-x {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <table>
+        <tbody>
+          <tr>
+            <td data-row="0" data-index="0"></td>
+            <td data-row="0" data-index="1"></td>
+            <td data-row="0" data-index="2"></td>
+          </tr>
+          <tr>
+            <td data-row="1" data-index="0"></td>
+            <td data-row="1" data-index="1"></td>
+            <td data-row="1" data-index="2"></td>
+          </tr>
+          <tr>
+            <td data-row="2" data-index="0"></td>
+            <td data-row="2" data-index="1"></td>
+            <td data-row="2" data-index="2"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div>p</div>
+    </div>
+    <script>
+      const socket = new WebSocket("ws://localhost:8000/ws/online/kenny/");
+      let Isactive = true;
+      const u_id = `kay-${Math.floor(Math.random() * 3)}`;
+      console.log(u_id);
+      document.querySelectorAll("td").forEach((el) => {
+        el.addEventListener("click", function (e) {
+          if (Isactive) {
+            const row = parseInt(e.target.getAttribute("data-row"));
+            const column = parseInt(e.target.getAttribute("data-index"));
+            const data = JSON.stringify({
+              row: row,
+              column: column,
+              id: u_id,
+            });
+            socket.send(data);
+            Isactive = false;
+          }
+        });
+      });
+      socket.onmessage = (e) => {
+        const result = JSON.parse(e.data);
+        console.table(result);
+        console.log(result.message.row);
+        document.querySelectorAll("td").forEach((el) => {
+          const elRow = parseInt(el.getAttribute("data-row"));
+          const elColumn = parseInt(el.getAttribute("data-index"));
+          if (elRow == result.message.row && elColumn == result.message.col) {
+            el.textContent = result.message.player;
+          }
+        });
+        Isactive = result.message.id == u_id ? false : true;
+      };
+    </script>
+  </body>
+</html>

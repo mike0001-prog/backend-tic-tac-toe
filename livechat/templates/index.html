@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Calculator</title>
+</head>
+
+<body>
+    <textarea name="ta" id="results" cols="30" rows="10">
+
+    </textarea><br>
+    Enter the expression: <input type="text" id="exp">
+    <input type="button" id="submit" value="Get Results">
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/live/kenny/');
+        socket.onmessage = (e) => {
+            // e.type == "c"
+        console.log(e.data)
+            result = JSON.parse(e.data).message;
+            document.getElementById("results").value += "Server: " + result + "\n";
+              Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                new Notification("Notification enabled 🎉", {
+                    body: result
+                });
+                }
+            });
+        }
+
+        socket.onclose = (e) => {
+            console.log("Socket closed!");
+        }
+
+        document.querySelector('#exp').onkeyup = function (e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#submit ').click();
+            }
+        };
+
+        document.querySelector("#submit").onclick = (e) => {
+            inputfield = document.querySelector("#exp")
+            exp = inputfield.value
+            // socket.send(JSON.stringify(
+            //     {
+            //         message: exp
+            //     }
+            // ))
+
+            
+            // form = {"title":exp}
+            f = new FormData()
+            f.append("title",exp)
+            fetch("{% url 'api_viewc' %}",{
+                method: 'POST',
+                body:  f
+            })
+            .then((response)=>{ response.json()})
+            .then((data)=>{console.log(data)})
+            .catch((error)=>{console.error();
+            })
+            
+            document.querySelector("#results").value += "You: " + exp + "\n";
+            inputfield.value = "";
+        }
+        
+    
+
+
+    </script>
+</body>
+
+</html>
