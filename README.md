@@ -35,7 +35,7 @@ backend/
 ### 1. Clone the repository
 
 ```bash id="a1x9bz"
-git clone https://github.com/mike0001-prog/backend-tic-tac-toe
+git clone https://github.com/mike0001-prog/backend-tic-tac-toe.git
 cd backend-tic-tac-toe
 ```
 
@@ -82,7 +82,7 @@ daphne tictactoe.asgi:application
 Example:
 
 ```
-ws://localhost:8000/ws/game/
+ws://localhost:8000/ws/online/<room_name>
 ```
 
 > Handles:
