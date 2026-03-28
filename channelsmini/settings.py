@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-i^z8hte)b_uwn5i&4(t@+4sab-bvqe)j*p@zv5^_2-f#c$m&4u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS","127.0.0.1").split(",")
 
 
 # Application definition
@@ -39,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
+    # 'rest_framework',
     'corsheaders',
     "livechat.apps.LivechatConfig",
 
@@ -57,7 +60,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'channelsmini.urls'
-import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -100,11 +102,24 @@ DATABASES = {
 #         },
 #     },
 # }
-CHANNEL_LAYERS = {
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+               os.getenv("REDIS_URL")
+            ],
+        },
     },
 }
+    
 
 
 # Password validation
@@ -125,8 +140,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    pass
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
