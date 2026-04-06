@@ -1,57 +1,57 @@
 import json
 from channels.generic.websocket import WebsocketConsumer,AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import Message
-class Chat(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
-        print(self.room_group_name)
+# from .models import Message
+# class Chat(AsyncWebsocketConsumer):
+#     async def connect(self):
+#         self.room_name = self.scope['url_route']['kwargs']['room_name']
+#         self.room_group_name = f'chat_{self.room_name}'
+#         print(self.room_group_name)
         
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
-        # print("connected")
-        print("CONNECTED", self.channel_name)
+#         # Join room group
+#         await self.channel_layer.group_add(
+#             self.room_group_name,
+#             self.channel_name
+#         )
+#         # print("connected")
+#         print("CONNECTED", self.channel_name)
 
-        await self.accept()
+#         await self.accept()
 
-    async def disconnect(self, close_code):
-        await self.close()   
-    # @database_sync_to_async
-    async def receive(self, text_data):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
+#     async def disconnect(self, close_code):
+#         await self.close()   
+#     # @database_sync_to_async
+#     async def receive(self, text_data):
+#         self.room_name = self.scope['url_route']['kwargs']['room_name']
+#         self.room_group_name = f'chat_{self.room_name}'
 
-        print(self.room_group_name)
-        text_data_json = json.loads(text_data)
-        # print(text_data)
-        expression = text_data_json['message']
-        # Message.objects.create(text=expression)
-        # self.save_message(text_data_json)
-        result = f"yes {expression}"
-        await self.channel_layer.group_send(
-             self.room_group_name,
-            {
-                "type": "chat.message",
-                "message": result,
-            }
-        )
-        print("broadcasted")
-        # await self.send(text_data=json.dumps({
-        #     'result': result
-        # }))
-    async def chat_message(self, event):
-        print("EVENT:", event)
-        print("chatting")
-        await self.send(text_data=json.dumps({
-            "message": event["message"],
-        }))
-    async def dispatch(self, message):
-        print("DISPATCH RECEIVED:", message)
-        await super().dispatch(message)
+#         print(self.room_group_name)
+#         text_data_json = json.loads(text_data)
+#         # print(text_data)
+#         expression = text_data_json['message']
+#         # Message.objects.create(text=expression)
+#         # self.save_message(text_data_json)
+#         result = f"yes {expression}"
+#         await self.channel_layer.group_send(
+#              self.room_group_name,
+#             {
+#                 "type": "chat.message",
+#                 "message": result,
+#             }
+#         )
+#         print("broadcasted")
+#         # await self.send(text_data=json.dumps({
+#         #     'result': result
+#         # }))
+#     async def chat_message(self, event):
+#         print("EVENT:", event)
+#         print("chatting")
+#         await self.send(text_data=json.dumps({
+#             "message": event["message"],
+#         }))
+#     async def dispatch(self, message):
+#         print("DISPATCH RECEIVED:", message)
+#         await super().dispatch(message)
 
     # def create_list(self,event):
     #     self.send(
@@ -102,6 +102,7 @@ class Game(AsyncWebsocketConsumer):
                "message":{"message":"opponent disconnected","type":"player_disconnect"} 
             }
         )
+        self.brain.cache.delete(self.room_name)
         await self.close()   
     
     async def receive(self, text_data):
